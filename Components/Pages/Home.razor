@@ -1,0 +1,41 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<Container class="mt-5 d-flex flex-column align-items-center">
+    <h1>ShowTime</h1>
+    <p>Managementul festivalelor tale.</p>
+
+    <div class="d-flex flex-row justify-content-center gap-4 mt-4">
+        <Card style="width: 18rem;">
+            <CardImage Source="/images/electric_castle.jpg" Alt="Electric Castle" Class="card-image" />
+            <CardBody>
+                <CardTitle>Electric Castle</CardTitle>
+                <CardText>Electric Castle festival in Romania.</CardText>
+                <Link To="https://electriccastle.ro" Target="Target.Blank">
+                    <Button Color="Color.Secondary" Class="w-100">Go to Electric Castle</Button>
+                </Link>
+            </CardBody>
+        </Card>
+        <Card style="width: 18rem;">
+            <CardImage Source="/images/untold.jpg" Alt="Untold" Class="card-image" />
+            <CardBody>
+                <CardTitle>Untold</CardTitle>
+                <CardText>Untold festival in Cluj-Napoca.</CardText>
+                <Link To="https://untold.com" Target="Target.Blank">
+                    <Button Color="Color.Primary" Class="w-100">Go to Untold</Button>
+                </Link>
+            </CardBody>
+        </Card>
+        <Card style="width: 18rem;">
+            <CardImage Source="/images/neversea.jpg" Alt="Neversea" Class="card-image" />
+            <CardBody>
+                <CardTitle>Neversea</CardTitle>
+                <CardText>Neversea festival by the sea.</CardText>
+                <Link To="https://neversea.com" Target="Target.Blank">
+                    <Button Color="Color.Info" Class="w-100">Go to Neversea</Button>
+                </Link>
+            </CardBody>
+        </Card>
+    </div>
+</Container>
