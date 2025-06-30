@@ -1,0 +1,31 @@
+@page "/bookings"
+@using ShowTime.Repositories.Interfaces
+@inject IRepositoryBooking repositoryBooking
+@using Blazorise.DataGrid
+
+<PageTitle>Bookings</PageTitle>
+
+@code {
+    private IEnumerable<Booking> bookings;
+    protected override async Task OnInitializedAsync()
+    {
+        bookings = await repositoryBooking.GetAllAsync();
+    }
+}
+
+<Container>
+    <h1>All the bookings</h1>
+
+    <DataGrid
+        TItem="Booking"
+        Data="@bookings"
+        >
+        <DataGridColumns>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.Id)" Caption="#"/>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.Email)" Caption="Email"/>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.Date)" Caption="Date"/>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.FestivalId)" Caption="Festival"/>
+        </DataGridColumns>
+    </DataGrid>
+
+</Container>
