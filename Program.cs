@@ -25,6 +25,8 @@ builder.Services
     .AddFontAwesomeIcons();
 
 builder.Services.AddScoped<IRepositoryBand, RepositoryBand>();
+builder.Services.AddScoped<IRepositoryBooking, RepositoryBooking>();
+builder.Services.AddScoped<IRepositoryFestival, RepositoryFestival>();
 
 var app = builder.Build();
 
