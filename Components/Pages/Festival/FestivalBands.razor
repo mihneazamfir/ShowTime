@@ -2,7 +2,6 @@
 
 @using ShowTime.Entities;
 @using ShowTime.Repositories.Interfaces;
-@using ShowTime.Repositories.Implementation;
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 @using Blazorise
@@ -10,29 +9,50 @@
 
 @code {
     [Inject] public required IRepositoryFestival RepositoryFestival { get; set; }
-    [Inject] public required IRepositoryFestivalBand RepositoryFestivalBand { get; set; }
     [Inject] public required IRepositoryBand RepositoryBand { get; set; }
     [SupplyParameterFromQuery(Name = "id")]
     public string? IdString { get; set; }
-    private Festival currentFestival { get; set; }
-    private List<Band> bands;
-    private List<Band> unbooked;
-    private List<Band> booked;
+    private Festival currentFestival { get; set; } = new();
+
+    private List<Band> bands = new();
+    private List<Band> unbooked = new();
+    private List<Band> booked = new();
+
     protected override async Task OnInitializedAsync()
     {
         if (Guid.TryParse(IdString, out Guid id))
         {
-            currentFestival = await RepositoryFestival.GetByIdAsync(id) ?? new Festival();
+            currentFestival = await RepositoryFestival.GetByIdWithBandsAsync(id) ?? new Festival();
             if (currentFestival.Id == Guid.Empty)
+            {
                 NavigationManager.NavigateTo("/error?type=notfound");
+                return;
             }
+        }
         else
         {
             NavigationManager.NavigateTo("/error?type=badformat");
+            return;
         }
+
         bands = (await RepositoryBand.GetAllAsync()).ToList();
-        booked = (currentFestival.Bands).ToList();
-        unbooked = (bands.Where(band => booked.Contains(band)!)).ToList();
+
+        booked = currentFestival.Bands.ToList();
+        unbooked = bands.Where(b => !booked.Any(bb => bb.Id == b.Id)).ToList();
+    }
+
+    private async Task HandleSubmit()
+    {
+        currentFestival.Bands.Clear();
+        foreach (var band in booked)
+        {
+            currentFestival.Bands.Add(band);
+        }
+
+        RepositoryFestival.Update(currentFestival);
+        await RepositoryFestival.SaveChangesAsync();
+
+        NavigationManager.NavigateTo($"/festivals");
     }
 }
 
@@ -40,11 +60,15 @@
     <TransferList
         TItem="Band"
         Items="@bands"
-        SelectionMode="ListGroupSelectionMode.Single"
+        @bind-ItemsStart="unbooked"
+        @bind-ItemsEnd="booked"
+        SelectionMode="ListGroupSelectionMode.Multiple"
         Mode="ListGroupMode.Selectable"
-        Scrollable=false
-        ShowMoveAll=false
+        Scrollable="true"
+        ShowMoveAll="false"
         ValueField="item => item.Name"
         TextField="item => item.Name">
     </TransferList>
+
+    <Button Color="Color.Primary" Class="mt-3" Clicked="HandleSubmit">Save</Button>
 </Container>

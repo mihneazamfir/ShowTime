@@ -38,7 +38,19 @@
                     Disabled="@((selectedFestival == null))"
                     Type="ButtonType.Link"
                     To="@($"festivals/update?id={selectedFestival?.Id}")">
-                Edit
+                Edit Informations
+            </Button>
+            <Button Color="Color.Info"
+                    Disabled="@((selectedFestival == null))"
+                    Type="ButtonType.Link"
+                    To="@($"festivals/lineup?id={selectedFestival?.Id}")">
+                Edit Lineup
+            </Button>
+            <Button Color="Color.Warning"
+                    Disabled="@((selectedFestival == null))"
+                    Type="ButtonType.Link"
+                    To="@($"festivals/planning?id={selectedFestival?.Id}")">
+                Edit Planning
             </Button>
             <Button Color="Color.Danger"
                     Disabled="@((selectedFestival == null))"
