@@ -16,12 +16,23 @@
     <link href="_content/Blazorise/blazorise.css?v=1.7.7.0" rel="stylesheet" />
     <link href="_content/Blazorise.Bootstrap5/blazorise.bootstrap5.css?v=1.7.7.0" rel="stylesheet" />
 
-    <HeadOutlet @rendermode="InteractiveServer"/>
+    <HeadOutlet @rendermode=RenderModeForPage/>
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer"/>
+    <Routes @rendermode=RenderModeForPage/>
     <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@code {
+
+    private IComponentRenderMode? RenderModeForPage =>
+        HttpContextAccessor.HttpContext?.Request.Path.StartsWithSegments("/Account") == true
+            ? null
+            : InteractiveServer;
+
+}

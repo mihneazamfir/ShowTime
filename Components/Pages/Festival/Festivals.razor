@@ -1,0 +1,68 @@
+@page "/festivals"
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject IRepositoryFestival repositoryFestival
+@using Blazorise.DataGrid
+
+<PageTitle>Festivals</PageTitle>
+
+<Container>
+    <h1>All the Festivals</h1>
+
+    <DataGrid
+        TItem="Festival"
+        Data="@festivals"
+        ShowPager="true"
+        ShowPageSizes="true"
+        @bind-SelectedRow="@selectedFestival"
+        Editable
+        Responsive
+        CommandMode="DataGridCommandMode.ButtonRow">
+        <DataGridColumns>
+            <DataGridColumn TItem="Festival" Field="@nameof(Festival.Id)" Caption="#"/>
+            <DataGridColumn TItem="Festival" Field="@nameof(Festival.Location)" Caption="Location"/>
+            <DataGridColumn TItem="Festival" Field="@nameof(Festival.Name)" Caption="Name"/>
+            <DataGridColumn TItem="Festival" Field="@nameof(Festival.StartDate)" Caption="StartDate"/>
+            <DataGridColumn TItem="Festival" Field="@nameof(Festival.EndDate)" Caption="EndDate"/>
+            @* <DataGridColumn TItem="Festival" Field="@nameof(Festival.Bands)" Caption="Bands"/>
+            <DataGridColumn TItem="Festival" Field="@nameof(Festival.Bookings)" Caption="Bookings"/> *@
+        </DataGridColumns>
+
+        <ButtonRowTemplate>
+            <Button Color="Color.Success"
+                    Type="ButtonType.Link"
+                    To="/festivals/add">
+                New Festival
+            </Button>
+            <Button Color="Color.Primary"
+                    Disabled="@((selectedFestival == null))"
+                    Type="ButtonType.Link"
+                    To="@($"festivals/update?id={selectedFestival?.Id}")">
+                Edit
+            </Button>
+            <Button Color="Color.Danger"
+                    Disabled="@((selectedFestival == null))"
+                    Clicked="@DeleteSelected">
+                Delete
+            </Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</Container>
+
+@code {
+    private Festival selectedFestival;
+    private IEnumerable<Festival> festivals;
+    protected override async Task OnInitializedAsync()
+    {
+        festivals = await repositoryFestival.GetAllAsync();
+    }
+
+    protected async void DeleteSelected()
+    {
+        repositoryFestival.Delete(selectedFestival);
+        await repositoryFestival.SaveChangesAsync();
+        festivals = await repositoryFestival.GetAllAsync();
+        selectedFestival = null;
+        StateHasChanged();
+    }
+}

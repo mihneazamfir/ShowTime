@@ -1,4 +1,4 @@
-// using ShowTime.Entities;
+using ShowTime.Entities;
 
 namespace ShowTime.Repositories.Interfaces
 {

@@ -1,4 +1,4 @@
-// using ShowTime.Entities;
+using ShowTime.Entities;
 using ShowTime.Context;
 using ShowTime.Repositories.Interfaces;
 

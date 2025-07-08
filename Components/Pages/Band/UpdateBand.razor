@@ -1,0 +1,59 @@
+@page "/bands/update"
+
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject NavigationManager NavigationManager 
+@rendermode InteractiveServer
+
+<h3>Update Band</h3>
+<Fields>
+    <div>
+        <Field>
+            <Label>Name</Label>
+            <InputText @bind-Value="Band.Name"/>
+        </Field>
+    </div>
+    <div>
+        <Field ColumnSize="ColumnSize.Is5">
+            <Select TValue="Genre" @bind-SelectedValue="Band.Genre">
+                @foreach (Genre genre in Enum.GetValues<Genre>())
+                {
+                    <SelectItem Value="@genre">@genre.ToString()</SelectItem>
+                }
+            </Select>
+        </Field>
+    </div>
+</Fields>
+
+<Button Color="Color.Primary" Clicked="HandleSubmit">Save</Button>
+
+@code {
+    [SupplyParameterFromQuery(Name = "id")]
+    public string? IdString { get; set; }
+
+    [Inject]
+    public required IRepositoryBand RepositoryBand { get; set; }
+
+    private Band Band { get; set; } = new Band();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Guid.TryParse(IdString, out Guid id))
+        {
+            Band = await RepositoryBand.GetByIdAsync(id) ?? new Band();
+            if (Band.Id == Guid.Empty)
+                NavigationManager.NavigateTo("/error?type=notfound");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/error?type=badformat");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        RepositoryBand.Update(Band);
+        await RepositoryBand.SaveChangesAsync();
+        NavigationManager.NavigateTo("/bands");
+    }
+}

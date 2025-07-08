@@ -1,0 +1,69 @@
+@page "/bookings/update"
+
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject NavigationManager NavigationManager 
+@rendermode InteractiveServer
+
+<h3>Update Booking</h3>
+
+<Fields>
+    <div>
+        <Field>
+            <Label>Email</Label>
+            <InputText @bind-Value="Booking.Email" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <InputSelect @bind-Value="Booking.FestivalId">
+                <option value="">-- Select Festival --</option>
+                @if (FestivalsList != null)
+                {
+                    @foreach (var festival in FestivalsList)
+                    {
+                        <option value="@festival.Id">@festival.Name</option>
+                    }
+                }
+            </InputSelect>
+        </Field>
+    </div>
+</Fields>
+
+<Button Color="Color.Primary" Clicked="HandleSubmit">Save</Button>
+
+@code {
+    [SupplyParameterFromQuery(Name = "id")]
+    public string? IdString { get; set; }
+    private Booking Booking { get; set; } = new Booking();
+    
+    [Inject]
+    public required IRepositoryBooking RepositoryBooking { get; set; }
+
+    [Inject]
+    public required IRepositoryFestival RepositoryFestival { get; set; }
+
+    private List<Festival>? FestivalsList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        FestivalsList = (await RepositoryFestival.GetAllAsync()).ToList();
+        if (Guid.TryParse(IdString, out Guid id))
+        {
+            Booking = await RepositoryBooking.GetByIdAsync(id) ?? new Booking();
+            if (Booking.Id == Guid.Empty)
+                NavigationManager.NavigateTo("/error?type=notfound");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/error?type=badformat");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        RepositoryBooking.Update(Booking);
+        await RepositoryBooking.SaveChangesAsync();
+        NavigationManager.NavigateTo("/bookings");
+    }
+}

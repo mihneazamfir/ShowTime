@@ -1,0 +1,68 @@
+@page "/bookings"
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject IRepositoryBooking repositoryBooking
+@using Blazorise.DataGrid
+
+<PageTitle>Bookings</PageTitle>
+
+<Container>
+    <h1>All the bookings</h1>
+
+    <DataGrid
+        TItem="Booking"
+        Data="@bookings"
+        ShowPager="true"
+        ShowPageSizes="true"
+        @bind-SelectedRow="@selectedBooking"
+        Editable
+        Responsive
+        CommandMode="DataGridCommandMode.ButtonRow"
+        >
+        <DataGridColumns>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.Id)" Caption="#"/>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.Email)" Caption="Email"/>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.Date)" Caption="Date"/>
+            <DataGridColumn TItem="Booking" Field="@nameof(Booking.FestivalId)" Caption="Festival"/>
+        </DataGridColumns>
+
+        <ButtonRowTemplate>
+            <Button Color="Color.Success"
+                    Type="ButtonType.Link"
+                    To="/bookings/add">
+                New Booking
+            </Button>
+            <Button Color="Color.Primary"
+                    Disabled="@((selectedBooking == null))"
+                    Type="ButtonType.Link"
+                    To="@($"bookings/update?id={selectedBooking?.Id}")">
+                Edit
+            </Button>
+            <Button Color="Color.Danger"
+                    Disabled="@((selectedBooking == null))"
+                    Clicked="@DeleteSelected">
+                Delete
+            </Button>
+        </ButtonRowTemplate>
+
+    </DataGrid>
+
+</Container>
+
+@code {
+    private IEnumerable<Booking> bookings;
+    private Booking selectedBooking;
+    protected override async Task OnInitializedAsync()
+    {
+        bookings = await repositoryBooking.GetAllAsync();
+    }
+
+    protected async void DeleteSelected()
+    {
+        repositoryBooking.Delete(selectedBooking);
+        await repositoryBooking.SaveChangesAsync();
+        bookings = await repositoryBooking.GetAllAsync();
+        selectedBooking = null;
+        StateHasChanged();
+    }
+}

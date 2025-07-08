@@ -1,0 +1,35 @@
+@page "/festival/planning"
+
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Repositories.Implementation
+@using ShowTime.Entities
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Modify Lineup</h3>
+
+@code {
+    [Inject]
+    public required IRepositoryBand RepositoryBand { get; set; }
+    public required IRepositoryFestival RepositoryFestival { get; set; }
+
+    [SupplyParameterFromQuery(Name = "id")]
+    public string? IdString { get; set; }
+    private Festival currentFestival;
+    private IEnumerable<Band> bands;
+    protected override async Task OnInitializedAsync()
+    {
+        if(Guid.TryParse(IdString, out Guid id))
+        {
+            currentFestival = await RepositoryFestival.GetByIdAsync(id) ?? new Festival();
+            if(currentFestival.Id == Guid.Empty)
+                NavigationManager.NavigateTo("/error?type=notfound");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/error?type=badformat");
+        }
+        bands = (await RepositoryBand.GetAllAsync())
+                .Where(band => band.Festivals.Contains(currentFestival));
+    }
+}

@@ -1,0 +1,58 @@
+@page "/festivals/add"
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Create Festival</h3>
+
+<Fields>
+    <div>
+        <Field>
+            <Label RequiredIndicator>Name</Label>
+            <InputText @bind-Value="Festival.Name" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <Label RequiredIndicator>Location</Label>
+            <InputText @bind-Value="Festival.Location" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <Label>Start Date</Label>
+            <DateEdit @bind-Date="Festival.StartDate"
+                    Min="@DateTime.Today" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <Label>End Date</Label>
+            <DateEdit @bind-Date="Festival.EndDate"
+                    Min="@Festival.StartDate"
+                    Max="@DateTime.Today.AddYears(2)" />
+        </Field>
+    </div>
+    
+</Fields>
+
+<Button Color="Color.Primary" Clicked="HandleSubmit">Save</Button>
+
+@code {
+    private Festival Festival { get; set; } = new Festival
+    {
+        StartDate = DateTime.Today,
+        EndDate = DateTime.Today
+    };
+
+    [Inject]
+    public required IRepositoryFestival RepositoryFestival { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await RepositoryFestival.AddAsync(Festival);
+        await RepositoryFestival.SaveChangesAsync();
+        NavigationManager.NavigateTo("/festivals");
+    }
+}

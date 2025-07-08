@@ -1,0 +1,67 @@
+@page "/bands"
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject IRepositoryBand repositoryBand
+@using Blazorise.DataGrid
+
+
+<PageTitle>Bands</PageTitle>
+
+<Container>
+    <h1>All the bands</h1>
+
+    <DataGrid
+    TItem="Band"
+    Data="@bands"
+    ShowPager="true"
+    ShowPageSizes="true"
+    @bind-SelectedRow="@selectedBand"
+    Editable
+    Responsive
+    CommandMode="DataGridCommandMode.ButtonRow">
+
+        <DataGridColumns>
+            <DataGridColumn TItem="Band" Field="@nameof(Band.Id)" Caption="#" />
+            <DataGridColumn TItem="Band" Field="@nameof(Band.Name)" Caption="Name" Editable />
+            <DataGridColumn TItem="Band" Field="@nameof(Band.Genre)" Caption="Genre" Editable />
+        </DataGridColumns>
+
+        <ButtonRowTemplate>
+            <Button Color="Color.Success"
+                    Type="ButtonType.Link"
+                    To="/bands/add">
+                New Band
+            </Button>
+            <Button Color="Color.Primary"
+                    Disabled="@((selectedBand == null))"
+                    Type="ButtonType.Link"
+                    To="@($"bands/update?id={selectedBand?.Id}")">
+                Edit
+            </Button>
+            <Button Color="Color.Danger"
+                    Disabled="@((selectedBand == null))"
+                    Clicked="@DeleteSelected">
+                Delete
+            </Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+
+</Container>
+
+@code {
+    private IEnumerable<Band> bands;
+    private Band selectedBand;
+    protected override async Task OnInitializedAsync()
+    {
+        bands = await repositoryBand.GetAllAsync();
+    }
+
+    protected async void DeleteSelected()
+    {
+        repositoryBand.Delete(selectedBand);
+        await repositoryBand.SaveChangesAsync();
+        bands = await repositoryBand.GetAllAsync();
+        selectedBand = null;
+        StateHasChanged();
+    }
+}

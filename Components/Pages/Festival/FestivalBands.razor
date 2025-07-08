@@ -1,0 +1,50 @@
+@page "/festivals/lineup"
+
+@using ShowTime.Entities;
+@using ShowTime.Repositories.Interfaces;
+@using ShowTime.Repositories.Implementation;
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@using Blazorise
+@using Blazorise.Bootstrap5
+
+@code {
+    [Inject] public required IRepositoryFestival RepositoryFestival { get; set; }
+    [Inject] public required IRepositoryFestivalBand RepositoryFestivalBand { get; set; }
+    [Inject] public required IRepositoryBand RepositoryBand { get; set; }
+    [SupplyParameterFromQuery(Name = "id")]
+    public string? IdString { get; set; }
+    private Festival currentFestival { get; set; }
+    private List<Band> bands;
+    private List<Band> unbooked;
+    private List<Band> booked;
+    protected override async Task OnInitializedAsync()
+    {
+        if (Guid.TryParse(IdString, out Guid id))
+        {
+            currentFestival = await RepositoryFestival.GetByIdAsync(id) ?? new Festival();
+            if (currentFestival.Id == Guid.Empty)
+                NavigationManager.NavigateTo("/error?type=notfound");
+            }
+        else
+        {
+            NavigationManager.NavigateTo("/error?type=badformat");
+        }
+        bands = (await RepositoryBand.GetAllAsync()).ToList();
+        booked = (currentFestival.Bands).ToList();
+        unbooked = (bands.Where(band => booked.Contains(band)!)).ToList();
+    }
+}
+
+<Container>
+    <TransferList
+        TItem="Band"
+        Items="@bands"
+        SelectionMode="ListGroupSelectionMode.Single"
+        Mode="ListGroupMode.Selectable"
+        Scrollable=false
+        ShowMoveAll=false
+        ValueField="item => item.Name"
+        TextField="item => item.Name">
+    </TransferList>
+</Container>

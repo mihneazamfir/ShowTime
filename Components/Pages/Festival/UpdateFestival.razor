@@ -1,0 +1,68 @@
+@page "/festivals/update"
+
+@using ShowTime.Repositories.Interfaces
+@using ShowTime.Entities
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Create Festival</h3>
+
+<Fields>
+    <div>
+        <Field>
+            <Label RequiredIndicator>Name</Label>
+            <InputText @bind-Value="Festival.Name" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <Label RequiredIndicator>Location</Label>
+            <InputText @bind-Value="Festival.Location" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <Label>Start Date</Label>
+            <DateEdit @bind-Date="Festival.StartDate"
+                    Min="@DateTime.Today" />
+        </Field>
+    </div>
+    <div>
+        <Field>
+            <Label>End Date</Label>
+            <DateEdit @bind-Date="Festival.EndDate"
+                    Min="@Festival.StartDate"
+                    Max="@DateTime.Today.AddYears(2)" />
+        </Field>
+    </div>
+    
+</Fields>
+
+<Button Color="Color.Primary" Clicked="HandleSubmit">Save</Button>
+
+@code {
+    [SupplyParameterFromQuery(Name = "id")]
+    public string? IdString { get; set; }
+    [Inject]
+    public required IRepositoryFestival RepositoryFestival { get; set; }
+    private Festival Festival { get; set; } = new Festival();
+    protected override async Task OnInitializedAsync()
+    {
+        if (Guid.TryParse(IdString, out Guid id))
+        {
+            Festival = await RepositoryFestival.GetByIdAsync(id) ?? new Festival();
+            if (Festival.Id == Guid.Empty)
+                NavigationManager.NavigateTo("/error?type=notfound");
+            }
+        else
+        {
+            NavigationManager.NavigateTo("/error?type=badformat");
+        }
+    }
+    private async Task HandleSubmit()
+    {
+        RepositoryFestival.Update(Festival);
+        await RepositoryFestival.SaveChangesAsync();
+        NavigationManager.NavigateTo("/festivals");
+    }
+}
